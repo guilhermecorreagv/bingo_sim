@@ -19,8 +19,9 @@ std::vector<int> sample_5(MyRNG &gen, int offset = 0)
     return ret;
 }
 
-BingoCard::BingoCard(MyRNG &gen)
+BingoCard::BingoCard(MyRNG &gen, GameMode mode)
 {
+    this->mode = mode;
     std::fill(row_sums.begin(), row_sums.end(), 5); // all numbers filled
     std::fill(col_sums.begin(), col_sums.end(), 5); // all numbers filled
 
@@ -53,15 +54,27 @@ void BingoCard::update(int number)
             if (numbers[col_idx][i] == number)
             {
                 row_idx = i;
+                row_sums[row_idx]--;
                 numbers[col_idx][row_idx] = 0; // mark as done
                 break;
             }
         }
 
         numbers_set.erase(number);
+        int rem_elems = std::accumulate(row_sums.begin(), row_sums.end(), 0) + std::accumulate(col_sums.begin(), col_sums.end(), 0);
 
-        if (row_sums[row_idx] == 0 || col_sums[row_idx] == 0)
-            won = true;
+        switch (mode)
+        {
+        case GameMode::Line:
+            won = row_sums[row_idx] == 0 || col_sums[row_idx] == 0;
+            break;
+        case GameMode::FullHouse:
+
+            won = rem_elems == 0;
+            break;
+        default:
+            std::cout << "Found invalid mode during execution\n";
+        }
     }
 }
 
@@ -89,7 +102,7 @@ std::ostream &operator<<(std::ostream &os, const BingoCard &card)
     return os;
 }
 
-int BingoGame::Run()
+void BingoGame::Run()
 {
     for (int i = 0; i < 75; i++)
     {
@@ -99,18 +112,18 @@ int BingoGame::Run()
         std::cout << "Got the number " << current_number << std::endl;
         std::cout << "Situation of the cards:\n";
 #endif
-
-        for (int i = 0; i < (int)cards.size(); i++)
+        for (int j = 0; j < (int)cards.size(); j++)
         {
-            cards[i].update(current_number);
-
+            cards[j].update(current_number);
 #ifdef DEBUG
-            std::cout << "Card " << i << std::endl
-                      << cards[i];
+            std::cout << "Card " << j << std::endl
+                      << cards[j];
 #endif
-            if (cards[i].won)
-                return i;
+            if (cards[j].won)
+            {
+                result = i;
+                return;
+            }
         }
     }
-    return -1; // not allowed
 }

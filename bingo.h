@@ -16,7 +16,7 @@ MyRNG get_gen();
 
 std::vector<int> sample_5(MyRNG &gen, int offset);
 
-enum GameModes
+enum GameMode
 {
     FullHouse, // full card
     Line       // horizontal or vertical line
@@ -28,9 +28,10 @@ struct BingoCard
     std::vector<std::vector<int>> numbers;
     std::set<int> numbers_set;
     std::array<int, 5> row_sums, col_sums;
+    GameMode mode;
     bool won = false;
     void update(int number);
-    BingoCard(MyRNG &gen);
+    BingoCard(MyRNG &gen, GameMode mode);
 };
 
 class BingoGame
@@ -40,20 +41,22 @@ private:
     MyRNG gen;
     std::vector<int> numbers;
     std::vector<BingoCard> cards;
+    GameMode mode;
 
 public:
-    BingoGame(int num_players, MyRNG &gen) : num_players(num_players), gen(gen)
+    BingoGame(int num_players, MyRNG &gen, GameMode mode) : num_players(num_players), gen(gen), mode(mode)
     {
         for (int i = 0; i < 75; i++)
             numbers.push_back(i + 1);
         std::shuffle(numbers.begin(), numbers.end(), gen);
         for (int i = 0; i < num_players; i++)
-            cards.push_back(BingoCard(gen));
+            cards.push_back(BingoCard(gen, mode));
     }
     ~BingoGame()
     {
         cards.clear();
         numbers.clear();
     }
-    int Run();
+    void Run();
+    int result;
 };
