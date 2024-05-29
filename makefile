@@ -4,6 +4,13 @@ CXX = g++
 # Common compiler flags
 CXXFLAGS = -Wall -Wextra
 
+# (Optional) Use OpenMP
+OPENMP = 0
+ifeq ($(OPENMP), 1)
+	CXXFLAGS += -fopenmp
+endif
+
+
 # Debug-specific flags
 DEBUG_FLAGS = -DDEBUG -g
 

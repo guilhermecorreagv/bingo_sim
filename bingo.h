@@ -44,7 +44,7 @@ private:
     GameMode mode;
 
 public:
-    BingoGame(int num_players, MyRNG &gen, GameMode mode) : num_players(num_players), gen(gen), mode(mode)
+    BingoGame(int num_players, GameMode mode) : num_players(num_players), gen(get_gen()), mode(mode)
     {
         for (int i = 0; i < 75; i++)
             numbers.push_back(i + 1);

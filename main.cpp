@@ -9,6 +9,7 @@ int parse_args(int argc, char **argv, GameMode &mode, int &num_players, int &num
     if (argc != 4)
     {
         std::cerr << "Usage should be: MODE [Full/Line] NUM_PLAYERS NUM_ITERS";
+        return 1;
     }
     num_players = atoi(argv[2]);
     num_iters = atoi(argv[3]);
@@ -64,14 +65,14 @@ int main(int argc, char **argv)
     std::cout << "Running simulation for:\n\t" << num_players << " players\n\t" << num_iters << " iterations\n";
 
     // stats
-    std::vector<double> run_turns;
+    std::vector<double> run_turns(num_iters, 0.0);
 
+#pragma omp parallel for
     for (int i = 0; i < num_iters; i++)
     {
-        MyRNG gen = get_gen(); // already seeded
-        BingoGame b(num_players, gen, mode);
+        BingoGame b(num_players, mode);
         b.Run();
-        run_turns.push_back(static_cast<double>(b.result));
+        run_turns[i] = static_cast<double>(b.result);
     }
 
     std::cout << "Avg number of turns: " << calculate_mean(run_turns) << std::endl;
